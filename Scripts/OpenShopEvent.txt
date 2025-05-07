@@ -1,0 +1,11 @@
+print("Proximity event is live.")
+
+local interactionPart = script.Parent:WaitForChild("InteractionPart")
+local prompt = interactionPart:WaitForChild("ProximityPrompt")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local openShopEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("OpenShopEvent")
+
+prompt.Triggered:Connect(function(player)
+	print(player.Name .. " opened the shop.")
+	openShopEvent:FireClient(player)
+end)

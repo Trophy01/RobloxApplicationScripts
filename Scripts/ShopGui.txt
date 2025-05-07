@@ -1,0 +1,44 @@
+print("Shop GUI is active.")
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+local openShopEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("OpenShopEvent")
+local player = Players.LocalPlayer
+local shopGui = script.Parent
+local frame = shopGui:WaitForChild("ShopFrame")
+local buyButton = frame:WaitForChild("BuyApple")
+local closeButton = frame:WaitForChild("CloseButton")
+local moneyLabel = frame:WaitForChild("MoneyLabel")
+
+local playerMoney = 100
+local inventory = {}
+
+openShopEvent.OnClientEvent:Connect(function()
+	frame.Visible = true
+	moneyLabel.Text = "Money: $" .. playerMoney
+end)
+
+buyButton.MouseButton1Click:Connect(function()
+	local itemPrice = 20
+	if playerMoney >= itemPrice then
+		playerMoney -= itemPrice
+		table.insert(inventory, "Apple")
+		moneyLabel.Text = "Money: $" .. playerMoney
+
+		print("You bought an apple. Inventory: " .. #inventory)
+
+		local appleTool = ReplicatedStorage:WaitForChild("AppleTool")
+		local appleClone = appleTool:Clone()
+		appleClone.Parent = player.Backpack
+
+		print("Apple added to backpack. Total items: " .. #player.Backpack:GetChildren())
+	else
+		print("Not enough money.")
+	end
+end)
+
+closeButton.MouseButton1Click:Connect(function()
+	frame.Visible = false
+	print("Closed the shop.")
+end)

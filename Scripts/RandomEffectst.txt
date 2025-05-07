@@ -1,0 +1,147 @@
+local tool = script.Parent
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local activated = false
+local effectCounts = {}
+
+-- Keep track of how many times each effect has happened
+for i = 1, 10 do
+	effectCounts[i] = 0
+end
+
+local function pickRandomEffect()
+	local weights = {}
+	local total = 0
+
+	for i = 1, 10 do
+		local weight = 1 / (effectCounts[i] + 1) -- More used = less likely
+		weights[i] = weight
+		total += weight
+	end
+
+	local pick = math.random() * total
+	local running = 0
+
+	for i = 1, 10 do
+		running += weights[i]
+		if pick <= running then
+			return i
+		end
+	end
+
+	return 1 -- Just in case
+end
+
+tool.Activated:Connect(function()
+	if activated then return end
+	activated = true
+
+	local player = Players.LocalPlayer
+	local char = player.Character or player.CharacterAdded:Wait()
+	local human = char:FindFirstChildOfClass("Humanoid")
+	if not human then return end
+
+	print(player.Name .. " just ate the apple!")
+
+	local chosen = pickRandomEffect()
+	effectCounts[chosen] += 1
+
+	if chosen == 1 then
+		print("Speed mode! Zoom zoom 🏃💨")
+		local original = human.WalkSpeed
+		human.WalkSpeed = original * 2
+		wait(10)
+		human.WalkSpeed = original
+
+	elseif chosen == 2 then
+		print("Giant time! 🦍")
+		for _, part in ipairs(char:GetChildren()) do
+			if part:IsA("BasePart") then
+				part.Size *= 5
+			end
+		end
+		wait(10)
+		for _, part in ipairs(char:GetChildren()) do
+			if part:IsA("BasePart") then
+				part.Size /= 5
+			end
+		end
+
+	elseif chosen == 3 then
+		print("Jump boost! 🐸")
+		local original = human.JumpPower
+		human.JumpPower = original * 2
+		wait(10)
+		human.JumpPower = original
+
+	elseif chosen == 4 then
+		print("Spinny apple 🍎🔄")
+		local root = char:FindFirstChild("HumanoidRootPart")
+		if root then
+			for _ = 1, 20 do
+				root.CFrame *= CFrame.Angles(0, math.rad(36), 0)
+				wait(0.05)
+			end
+		end
+
+	elseif chosen == 5 then
+		print("Tiny mode activated 🐜")
+		for _, part in ipairs(char:GetChildren()) do
+			if part:IsA("BasePart") then
+				part.Size *= 0.5
+			end
+		end
+		wait(10)
+		for _, part in ipairs(char:GetChildren()) do
+			if part:IsA("BasePart") then
+				part.Size *= 2
+			end
+		end
+
+	elseif chosen == 6 then
+		print("Dance break! 💃🕺")
+		for _ = 1, 5 do
+			human:Move(Vector3.new(1, 0, 1), true)
+			wait(0.3)
+			human:Move(Vector3.new(-1, 0, -1), true)
+			wait(0.3)
+		end
+
+	elseif chosen == 7 then
+		print("Power punch loading... 💥")
+		human.WalkSpeed = 5
+		wait(2)
+		human.WalkSpeed = 100
+		wait(1)
+		human.WalkSpeed = 16
+
+	elseif chosen == 8 then
+		print("Whoa! Camera zooming in 🔍")
+		local cam = workspace.CurrentCamera
+		local originalFOV = cam.FieldOfView
+		cam.FieldOfView = 120
+		wait(5)
+		cam.FieldOfView = originalFOV
+
+	elseif chosen == 9 then
+		print("BOOM! Confetti time 🎉")
+		local root = char:FindFirstChild("HumanoidRootPart")
+		if root then
+			local kaboom = Instance.new("Explosion")
+			kaboom.Position = root.Position
+			kaboom.BlastPressure = 1
+			kaboom.BlastRadius = 1
+			kaboom.Parent = workspace
+		end
+
+	elseif chosen == 10 then
+		print("And... sit! 🍎🪑")
+		human.Sit = true
+		wait(3)
+		human.Sit = false
+	end
+
+	wait(0.5)
+	tool:Destroy()
+end)
